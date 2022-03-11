@@ -4,12 +4,8 @@ using UnityEngine;
 
 public class Ladder : MonoBehaviour
 {
-    [SerializeField] private GameObject stepPrefab;
-    [SerializeField] private Vector3 stepsDistance;
-    [SerializeField] private int stepsCount;
+    [SerializeField] private Vector3 stepDistance = new Vector3(1, -0.75f, 0);
     [SerializeField] private Queue<Transform> steps = new Queue<Transform>();
-
-    [SerializeField] private Vector3 movementDirection = new Vector3(1, -0.75f, 0);
 
     private float speed;
     private Vector3 destination;
@@ -25,7 +21,7 @@ public class Ladder : MonoBehaviour
 
     private void SetLadderSpeed()
     {
-        speed = 2 * movementDirection.magnitude / GamePhysics.JumpTime;
+        speed = 2 * stepDistance.magnitude / GamePhysics.JumpTime;
     }
 
     public void OnBumbleJumped()
@@ -42,7 +38,7 @@ public class Ladder : MonoBehaviour
 
     private IEnumerator MoveCoroutine()
     {
-        destination += movementDirection;
+        destination += stepDistance;
 
         while (destination.magnitude > 0.001f)
         {
@@ -50,7 +46,7 @@ public class Ladder : MonoBehaviour
 
             var md = Vector3.MoveTowards(Vector3.zero, destination, speed * Time.deltaTime);
 
-            foreach (var step in steps)
+            foreach (Transform step in transform)
             {
                 step.position += md;
             }
@@ -61,7 +57,7 @@ public class Ladder : MonoBehaviour
     private void MoveFirstStepToTop()
     {
         var step = steps.Dequeue();
-        step.transform.position += stepsDistance * steps.Count;
+        step.transform.position -= stepDistance * steps.Count;
         steps.Enqueue(step);
     }
 }
