@@ -5,6 +5,8 @@ public class ScoreController : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI finalScoreText;
+    [SerializeField] private TMP_InputField playerNameInput;
+    [SerializeField] private RatingController rating;
 
     private int score = 0;
 
@@ -25,5 +27,13 @@ public class ScoreController : MonoBehaviour
     public void IncreaseScore()
     {
         Score++;
+    }
+
+    public void SaveScoreToRating()
+    {
+        if (string.IsNullOrEmpty(playerNameInput.text)) return;
+
+        rating.SaveScore(playerNameInput.text, score);
+        GameStateMachine.Instance.ChangeState("Main menu");
     }
 }
