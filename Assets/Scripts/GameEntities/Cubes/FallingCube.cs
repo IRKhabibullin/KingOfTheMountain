@@ -10,6 +10,7 @@ public class FallingCube : MonoBehaviour
     [SerializeField] private float jumpTime;
 
     private Rigidbody _rb;
+    private IEnumerator jumpCoroutine;
 
     private void Awake()
     {
@@ -33,18 +34,15 @@ public class FallingCube : MonoBehaviour
         yield return new WaitForSeconds(jumpTimeout);
 
         _rb.AddForce(jumpForce, ForceMode.VelocityChange);
+        jumpCoroutine = null;
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Ladder"))
+        if (collision.gameObject.CompareTag("Ladder") && jumpCoroutine == null)
         {
-            StartCoroutine(JumpCoroutine());
-        }
-        else if (collision.gameObject.CompareTag("Bumble"))
-        {
-            Destroy(gameObject);
-            Debug.Log("Game over");
+            jumpCoroutine = JumpCoroutine();
+            StartCoroutine(jumpCoroutine);
         }
     }
 }

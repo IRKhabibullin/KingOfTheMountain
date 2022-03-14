@@ -8,17 +8,36 @@ public class CubesGenerator : MonoBehaviour
     [SerializeField] GameObject cubePrefab;
     [SerializeField] Transform generationPoint;
     [SerializeField] float generationTimeout;
+    [SerializeField] bool isGenerating;
 
     private void Start()
     {
         StartCoroutine(GenerateCoroutine());
     }
 
+    public void EnableGeneration()
+    {
+        isGenerating = true;
+    }
+
+    public void DisableGeneration()
+    {
+        isGenerating = false;
+    }
+
+    public void DestroyAllCubes()
+    {
+        foreach(var cube in FindObjectsOfType<FallingCube>())
+        {
+            Destroy(cube.gameObject);
+        }
+    }
+
     private IEnumerator GenerateCoroutine()
     {
         while (true) {
-
-            GenerateCube();
+            if (isGenerating)
+                GenerateCube();
 
             yield return new WaitForSeconds(generationTimeout);
         }

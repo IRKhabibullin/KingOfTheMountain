@@ -19,6 +19,15 @@ public class Ladder : MonoBehaviour
         }
     }
 
+    public void ResetSteps()
+    {
+        int i = 1;
+        foreach (var step in steps)
+        {
+            step.localPosition = -stepDistance * i++;
+        }
+    }
+
     private void SetLadderSpeed()
     {
         speed = 2 * stepDistance.magnitude / GamePhysics.JumpTime;

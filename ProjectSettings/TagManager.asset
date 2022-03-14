@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Ladder
   - Bumble
+  - Cube
   layers:
   - Default
   - TransparentFX
