@@ -10,7 +10,13 @@ public class RatingController : MonoBehaviour
     [SerializeField] private GameObject scoreInstancePrefab;
     [SerializeField] private Transform scoresList;
 
-    private const string SAVE_FILE_PATH = "rating";
+    private const string fileDirectory = "Rating";
+    private const string fileName = "data";
+    private string FilePath {
+        get {
+            return Path.Combine(Application.persistentDataPath, fileDirectory, fileName);
+        }
+    }
     private List<ScoreResult> scoresRating;
 
     public void DisplayRating()
@@ -52,7 +58,7 @@ public class RatingController : MonoBehaviour
         scoresRating.Add(new ScoreResult(playerName, score));
         scoresRating.Sort((a, b) => { return b.score.CompareTo(a.score); });
 
-        Stream stream = File.Open(SAVE_FILE_PATH, FileMode.OpenOrCreate);
+        Stream stream = File.Open(FilePath, FileMode.OpenOrCreate);
         BinaryFormatter formatter = new BinaryFormatter();
         formatter.Serialize(stream, scoresRating);
         stream.Close();
@@ -62,9 +68,14 @@ public class RatingController : MonoBehaviour
     {
         try
         {
+            if (!Directory.Exists(Path.GetDirectoryName(FilePath)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(FilePath));
+            }
+
             if (HasRatingFile())
             {
-                Stream stream = File.Open(SAVE_FILE_PATH, FileMode.Open);
+                Stream stream = File.Open(FilePath, FileMode.Open);
                 BinaryFormatter formatter = new BinaryFormatter();
                 scoresRating = (List<ScoreResult>)formatter.Deserialize(stream);
                 stream.Close();
@@ -77,9 +88,9 @@ public class RatingController : MonoBehaviour
         catch (Exception) { }
     }
 
-    public static bool HasRatingFile()
+    public bool HasRatingFile()
     {
-        return File.Exists(SAVE_FILE_PATH);
+        return File.Exists(FilePath);
     }
 }
 

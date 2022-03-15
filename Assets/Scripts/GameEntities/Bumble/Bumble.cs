@@ -47,7 +47,6 @@ public class Bumble : MonoBehaviour
 
     public void Jump()
     {
-
         if (Time.time - lastJumpedTime < GamePhysics.JumpTime) return;
 
         _rb.velocity = moveUpForce;
