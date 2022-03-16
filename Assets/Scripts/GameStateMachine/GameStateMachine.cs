@@ -42,6 +42,11 @@ public class GameStateMachine : MonoBehaviour
     private void Start()
     {
         currentState = initialState;
+        FindTransitions();
+    }
+
+    private void FindTransitions()
+    {
         transitions = new Dictionary<string, Dictionary<string, StateTransition>>();
 
         // temporary solution with passing string state.

@@ -1,80 +1,57 @@
-using UnityEngine;
-using UnityEngine.Events;
+﻿using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
-public class Bumble : MonoBehaviour
+public class Bumble
 {
-    public UnityEvent bumbleJumped;
+    public Vector3 jumpForce { get; private set; }
+    public bool CanJump
+    {
+        get { return Time.time - lastJumpedTime > GamePhysics.JumpTime; }
+    }
 
-    [SerializeField] private Vector3 startPosition;
-    [SerializeField] private Vector3 moveUpForce;
-    [SerializeField] private Vector3 moveSideForce;
-    [SerializeField] private GameObject stepPrefab;
-
-    private Rigidbody _rb;
+    private Vector3 sideJumpForce;
     private float lastJumpedTime;
     private int maxSideJumps;
-    private int currentSideJump = 0;
+    private int currentSideJump;
 
-    void Start()
+    public Bumble(float sideJumpPower, float stepWidth)
     {
-        _rb = GetComponent<Rigidbody>();
-        SetJumpVelocity();
-        SetSideJumpsLimit();
+        currentSideJump = 0;
+        lastJumpedTime = 0;
+        SetJumpVelocity(sideJumpPower);
+        SetSideJumpsLimit(stepWidth);
     }
 
-    private void SetJumpVelocity()
+    private void SetJumpVelocity(float sideJumpPower)
     {
-        moveUpForce = new Vector3(0, Mathf.Sqrt(Mathf.Abs(2 * Physics.gravity.y * GamePhysics.JumpHeight)), 0);
-        moveSideForce = new Vector3(0, moveUpForce.y * 0.6f, 1);
+        jumpForce = new Vector3(0, Mathf.Sqrt(Mathf.Abs(2 * Physics.gravity.y * GamePhysics.JumpHeight)), 0);
+        sideJumpForce = new Vector3(0, jumpForce.y * sideJumpPower, 1);
     }
-
-    private void SetSideJumpsLimit()
+    private void SetSideJumpsLimit(float stepWidth)
     {
-        var stepWidthHalf = stepPrefab.transform.localScale.z / 2;
-        var jumpTime = -2 * moveSideForce.y / Physics.gravity.y;
-        var sideJumpDistance = moveSideForce.z * jumpTime;
+        var stepWidthHalf = stepWidth / 2;
+        var jumpTime = -2 * sideJumpForce.y / Physics.gravity.y;
+        var sideJumpDistance = sideJumpForce.z * jumpTime;
         maxSideJumps = (int)(stepWidthHalf / sideJumpDistance);
     }
 
-    public void ResetObject()
+    public void UpdateJumpTime()
     {
-        // TODO probably need to move it all to simple class and rename this to just Reset
-        transform.position = startPosition;
-        _rb.velocity = Vector3.zero;
-        _rb.angularVelocity = Vector3.zero;
-    }
-
-    public void Jump()
-    {
-        if (Time.time - lastJumpedTime < GamePhysics.JumpTime) return;
-
-        _rb.velocity = moveUpForce;
         lastJumpedTime = Time.time;
-        bumbleJumped?.Invoke();
     }
 
-    public void MoveSide(int direction)
+    public bool CanJumpAside(int direction)
     {
-        if (Time.time - lastJumpedTime < GamePhysics.JumpTime) return;
+        return Mathf.Abs(currentSideJump + direction) < maxSideJumps;
+    }
 
-        if (Mathf.Abs(currentSideJump + direction) > maxSideJumps) return;
+    public Vector3 GetSideJumpForce(int direction)
+    {
+        return new Vector3(sideJumpForce.x, sideJumpForce.y, sideJumpForce.z * direction);
+    }
 
-        _rb.velocity = new Vector3(moveSideForce.x, moveSideForce.y, moveSideForce.z * direction);
+    public void UpdateSideJump(int direction)
+    {
         currentSideJump += direction;
-        lastJumpedTime = Time.time;
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Ladder"))
-        {
-            _rb.velocity = Vector3.zero;
-            _rb.angularVelocity = Vector3.zero;
-        }
-        else if (collision.gameObject.CompareTag("Cube"))
-        {
-            GameStateMachine.Instance.ChangeState("Game over");
-        }
+        UpdateJumpTime();
     }
 }

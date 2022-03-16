@@ -19,7 +19,7 @@ public class Ladder : MonoBehaviour
         }
     }
 
-    public void ResetSteps()
+    public void ResetStepsPosition()
     {
         int i = 1;
         foreach (var step in steps)

@@ -3,26 +3,27 @@ using UnityEngine;
 
 public class CubesGenerator : MonoBehaviour
 {
-    [SerializeField] Transform ladder;
-    [SerializeField] GameObject stepPrefab;
-    [SerializeField] GameObject cubePrefab;
-    [SerializeField] Transform generationPoint;
-    [SerializeField] float generationTimeout;
-    [SerializeField] bool isGenerating;
-
-    private void Start()
-    {
-        StartCoroutine(GenerateCoroutine());
-    }
+    [SerializeField] private Transform ladder;
+    [SerializeField] private GameObject stepPrefab;
+    [SerializeField] private GameObject cubePrefab;
+    [SerializeField] private Transform generationPoint;
+    [SerializeField] private float generationTimeout;
+    private IEnumerator generationCoroutine;
 
     public void EnableGeneration()
     {
-        isGenerating = true;
+        if (generationCoroutine != null) return;
+
+        generationCoroutine = GenerateCoroutine();
+        StartCoroutine(generationCoroutine);
     }
 
     public void DisableGeneration()
     {
-        isGenerating = false;
+        if (generationCoroutine == null) return;
+
+        StopCoroutine(generationCoroutine);
+        generationCoroutine = null;
     }
 
     public void DestroyAllCubes()
@@ -36,8 +37,7 @@ public class CubesGenerator : MonoBehaviour
     private IEnumerator GenerateCoroutine()
     {
         while (true) {
-            if (isGenerating)
-                GenerateCube();
+            GenerateCube();
 
             yield return new WaitForSeconds(generationTimeout);
         }

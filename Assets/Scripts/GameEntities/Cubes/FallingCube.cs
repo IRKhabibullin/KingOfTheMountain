@@ -24,9 +24,13 @@ public class FallingCube : MonoBehaviour
 
     private void SetJumpVelocity()
     {
-        // Some magic number, needed because of difference in height of jump start and end points. Found experimentally
+        // Some magic number, needed because of difference in height of jump start and end points. Found experimentally, but it's precise
         float xVelocityCoefficient = 1.28f;
-        jumpForce = new Vector3(jumpLength / (xVelocityCoefficient * jumpTime), (jumpLength - 0.5f * Physics.gravity.y * Mathf.Pow(jumpTime, 2f)) / jumpTime, 0);
+        jumpForce = new Vector3(
+            jumpLength / (xVelocityCoefficient * jumpTime),
+            (jumpLength - 0.5f * Physics.gravity.y * Mathf.Pow(jumpTime, 2f)) / jumpTime,
+            0
+        );
     }
 
     private IEnumerator JumpCoroutine()
@@ -43,6 +47,14 @@ public class FallingCube : MonoBehaviour
         {
             jumpCoroutine = JumpCoroutine();
             StartCoroutine(jumpCoroutine);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("DeadZone"))
+        {
+            Destroy(gameObject);
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using TMPro;
 using UnityEngine;
@@ -9,6 +10,7 @@ public class RatingController : MonoBehaviour
 {
     [SerializeField] private GameObject scoreInstancePrefab;
     [SerializeField] private Transform scoresList;
+    [SerializeField] private int maxRatingSize;
 
     private const string fileDirectory = "Rating";
     private const string fileName = "data";
@@ -57,6 +59,7 @@ public class RatingController : MonoBehaviour
         }
         scoresRating.Add(new ScoreResult(playerName, score));
         scoresRating.Sort((a, b) => { return b.score.CompareTo(a.score); });
+        scoresRating = scoresRating.Take(maxRatingSize).ToList();
 
         Stream stream = File.Open(FilePath, FileMode.OpenOrCreate);
         BinaryFormatter formatter = new BinaryFormatter();

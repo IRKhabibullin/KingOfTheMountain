@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
 public class TouchControls : MonoBehaviour
 {
@@ -8,42 +9,57 @@ public class TouchControls : MonoBehaviour
     public UnityEvent<int> OnSwipe;
     public UnityEvent OnTap;
 
-    private Vector2 touchStartPosition;
+    private Vector2? touchStartPosition = null;
     private Vector2 touchEndPosition;
     
     void Update()
     {
-        if (GameStateMachine.Instance.currentState != "Play") return;
-
         if (Input.touchCount == 0) return;
 
         // track only first touch for simplicity
         var touch = Input.GetTouch(0);
+
         if (touch.phase == TouchPhase.Began)
         {
+            if (!IsTouchValid(touch))
+            {
+                ResetStartTouch();
+                return;
+            }
+
             touchStartPosition = touch.position;
         }
-        if (IsStartDefined() && touch.phase == TouchPhase.Ended)
+        if (IsStartTouchDefined() && touch.phase == TouchPhase.Ended)
         {
             touchEndPosition = touch.position;
             DetectValidInput();
-            ResetTouch();
+            ResetStartTouch();
         }
     }
 
-    private bool IsStartDefined()
+    /// <summary>
+    /// Check that touch is not over UI
+    /// </summary>
+    /// <param name="touch"></param>
+    /// <returns></returns>
+    private bool IsTouchValid(Touch touch)
     {
-        return touchStartPosition != Vector2.negativeInfinity;
+        return !EventSystem.current.IsPointerOverGameObject(touch.fingerId);
     }
 
-    private void ResetTouch()
+    private void ResetStartTouch()
     {
-        touchStartPosition = Vector2.negativeInfinity;
+        touchStartPosition = null;
+    }
+
+    private bool IsStartTouchDefined()
+    {
+        return touchStartPosition != null;
     }
 
     private void DetectValidInput()
     {
-        var xDelta = touchEndPosition.x - touchStartPosition.x;
+        var xDelta = touchEndPosition.x - ((Vector2)touchStartPosition).x;
 
         if (Mathf.Abs(xDelta) < minSwipeDistance)
         {
@@ -53,7 +69,5 @@ public class TouchControls : MonoBehaviour
         {
             OnSwipe?.Invoke((int)Mathf.Sign(xDelta));
         }
-
-
     }
 }

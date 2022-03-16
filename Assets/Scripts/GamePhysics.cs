@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Physics calculus according to desired jump height and time
+/// Physics calculus according to desired bumble jump height and time
 /// </summary>
 public class GamePhysics : MonoBehaviour
 {
